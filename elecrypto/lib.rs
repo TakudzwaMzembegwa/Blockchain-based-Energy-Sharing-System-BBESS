@@ -4,71 +4,63 @@ use ink_lang as ink;
 
 #[ink::contract]
 mod elecrypto {
+    use ink_storage::{traits::SpreadAllocate, Mapping};
 
-    /// Defines the storage of your contract.
-    /// Add new fields to the below struct in order
-    /// to add new static storage fields to your contract.
+    /// Create storage for a simple ERC-20 contract.
     #[ink(storage)]
+    #[derive(SpreadAllocate)]
     pub struct Elecrypto {
-        /// Stores a single `bool` value on the storage.
-        value: bool,
+        /// Total token supply.
+        total_supply: Balance,
+        /// Mapping from owner to number of owned tokens.
+        balances: Mapping<AccountId, Balance>,
     }
 
     impl Elecrypto {
-        /// Constructor that initializes the `bool` value to the given `init_value`.
+        /// Create a new ERC-20 contract with an initial supply.
         #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
-            Self { value: init_value }
+        pub fn new(initial_supply: Balance) -> Self {
+            // Initialize mapping for the contract.
+            ink_lang::utils::initialize_contract(|contract| {
+                Self::new_init(contract, initial_supply)
+            })
         }
 
-        /// Constructor that initializes the `bool` value to `false`.
-        ///
-        /// Constructors can delegate to other constructors.
-        #[ink(constructor)]
-        pub fn default() -> Self {
-            Self::new(Default::default())
+        /// Initialize the ERC-20 contract with the specified initial supply.
+        fn new_init(&mut self, initial_supply: Balance) {
+            let caller = Self::env().caller();
+            self.balances.insert(&caller, &initial_supply);
+            self.total_supply = initial_supply;
         }
 
-        /// A message that can be called on instantiated contracts.
-        /// This one flips the value of the stored `bool` from `true`
-        /// to `false` and vice versa.
+        /// Returns the total token supply.
         #[ink(message)]
-        pub fn flip(&mut self) {
-            self.value = !self.value;
+        pub fn total_supply(&self) -> Balance {
+            self.total_supply
         }
 
-        /// Simply returns the current value of our `bool`.
+        /// Returns the account balance for the specified `owner`.
         #[ink(message)]
-        pub fn get(&self) -> bool {
-            self.value
+        pub fn balance_of(&self, owner: AccountId) -> Balance {
+            self.balances.get(owner).unwrap_or_default()
         }
     }
 
-    /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
-    /// module and test functions are marked with a `#[test]` attribute.
-    /// The below code is technically just normal Rust code.
     #[cfg(test)]
     mod tests {
-        /// Imports all the definitions from the outer scope so we can use them here.
         use super::*;
-
-        /// Imports `ink_lang` so we can use `#[ink::test]`.
         use ink_lang as ink;
-
-        /// We test if the default constructor does its job.
         #[ink::test]
-        fn default_works() {
-            let elecrypto = Elecrypto::default();
-            assert_eq!(elecrypto.get(), false);
+        fn new_works() {
+            let contract = Elecrypto::new(777);
+            assert_eq!(contract.total_supply(), 777);
         }
-
-        /// We test a simple use case of our contract.
         #[ink::test]
-        fn it_works() {
-            let mut elecrypto = Elecrypto::new(false);
-            assert_eq!(elecrypto.get(), false);
-            elecrypto.flip();
-            assert_eq!(elecrypto.get(), true);
+        fn balance_works() {
+            let contract = Elecrypto::new(100);
+            assert_eq!(contract.total_supply(), 100);
+            assert_eq!(contract.balance_of(AccountId::from([0x1; 32])), 100);
+            assert_eq!(contract.balance_of(AccountId::from([0x0; 32])), 0);
         }
     }
 }
