@@ -84,7 +84,7 @@ mod elecrypto {
         }
 
         #[ink(message)]
-        pub fn allowance(&self, owner: AccountId, spender: AccountId) -> Balance {
+        pub fn allowancetoken(&self, owner: AccountId, spender: AccountId) -> Balance {
             self.allowance_of_or_zero(&owner, &spender)
         }
 
@@ -186,7 +186,7 @@ mod elecrypto {
             assert_eq!(contract.balance_of(AccountId::from([0x1; 32])), 100);
             contract.approve(AccountId::from([0x1; 32]), 200);
             assert_eq!(
-                contract.allowance(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
+                contract.allowancetoken(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
                 200
             );
 
@@ -197,7 +197,7 @@ mod elecrypto {
             ));
             assert_eq!(contract.balance_of(AccountId::from([0x0; 32])), 50);
             assert_eq!(
-                contract.allowance(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
+                contract.allowancetoken(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
                 150
             );
 
@@ -208,7 +208,7 @@ mod elecrypto {
             ));
             assert_eq!(contract.balance_of(AccountId::from([0x0; 32])), 50);
             assert_eq!(
-                contract.allowance(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
+                contract.allowancetoken(AccountId::from([0x1; 32]), AccountId::from([0x1; 32])),
                 150
             );
         }
