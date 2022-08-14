@@ -30,7 +30,7 @@ mod elecrypto {
     #[ink(storage)]
     #[derive(SpreadAllocate)]
     pub struct Elecrypto {
-        /// The total supply.
+        /// The total supply of the token.
         total_supply: Balance,
         /// The balance of each user.
         balances: ink_storage::Mapping<AccountId, Balance>,
@@ -46,9 +46,6 @@ mod elecrypto {
                 let caller = Self::env().caller();
                 contract.balances.insert(&caller, &initial_supply);
 
-                // NOTE: `allowances` is default initialized by `initialize_contract`, so we don't
-                // need to do anything here
-
                 Self::env().emit_event(Transfer {
                     from: None,
                     to: Some(caller),
@@ -56,12 +53,13 @@ mod elecrypto {
                 });
             })
         }
-
+        // Return function of total supply
         #[ink(message)]
         pub fn total_supply(&self) -> Balance {
             self.total_supply
         }
 
+        // Return function of balance for a specific account
         #[ink(message)]
         pub fn balance_of(&self, owner: AccountId) -> Balance {
             self.balances.get(&owner).unwrap_or_default()
@@ -98,13 +96,11 @@ mod elecrypto {
             }
 
             let transfer_result = self.transfer_from_to(from, to, value);
-            // Check `transfer_result` because `from` account may not have enough balance
-            //   and return false.
             if !transfer_result {
                 return false;
             }
 
-            // Decrease the value of the allowance and transfer the tokens.
+            // Deduct the value of the allowance token and transfer the tokens.
             self.allowances.insert((from, caller), &(allowance - value));
             true
         }
@@ -142,6 +138,7 @@ mod elecrypto {
         }
     }
 
+    // Performing units test
     #[cfg(test)]
     mod tests {
         use super::*;
