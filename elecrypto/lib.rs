@@ -147,15 +147,15 @@ mod elecrypto {
 
         #[ink::test]
         fn new_works() {
-            let contract = Elecrypto::new(777);
-            assert_eq!(contract.total_supply(), 777);
+            let contract = Elecrypto::new(7000000);
+            assert_eq!(contract.total_supply(), 7000000);
         }
 
         #[ink::test]
         fn balance_works() {
-            let contract = Elecrypto::new(100);
-            assert_eq!(contract.total_supply(), 100);
-            assert_eq!(contract.balance_of(AccountId::from([0x1; 32])), 100);
+            let contract = Elecrypto::new(23000);
+            assert_eq!(contract.total_supply(), 23000);
+            assert_eq!(contract.balance_of(AccountId::from([0x1; 32])), 23000);
             assert_eq!(contract.balance_of(AccountId::from([0x0; 32])), 0);
         }
 
